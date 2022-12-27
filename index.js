@@ -129,11 +129,11 @@ exports.evm2wast = function (evmCode, opts = {
   function addStackCheck () {
     let check = ''
     if (segmentStackHigh !== 0) {
-      check = `(if (i32.gt_s (get_global $sp) (i32.const ${(1023 - segmentStackHigh) * 32})) 
+      check = `(if (i32.gt_s (global.get $sp) (i32.const ${(1023 - segmentStackHigh) * 32})) 
                  (then (unreachable)))`
     }
     if (segmentStackLow !== 0) {
-      check += `(if (i32.lt_s (get_global $sp) (i32.const ${-segmentStackLow * 32 - 32})) 
+      check += `(if (i32.lt_s (global.get $sp) (i32.const ${-segmentStackLow * 32 - 32})) 
                   (then (unreachable)))`
     }
     segment = check + segment
@@ -187,7 +187,7 @@ exports.evm2wast = function (evmCode, opts = {
 
     // creates a stack trace
     if (opts.stackTrace) {
-      segment += `(call $stackTrace (i32.const ${pc}) (i32.const ${opint}) (i32.const ${op.fee}) (get_global $sp))\n`
+      segment += `(call $stackTrace (i32.const ${pc}) (i32.const ${opint}) (i32.const ${op.fee}) (global.get $sp))\n`
     }
 
     let bytes
@@ -216,32 +216,32 @@ exports.evm2wast = function (evmCode, opts = {
       case 'JUMP':
         jumpFound = true
         segment += `;; jump
-                      (set_local $jump_dest (call $check_overflow 
-                                             (i64.load (get_global $sp))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 8)))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 16)))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 24)))))
-                      (set_global $sp (i32.sub (get_global $sp) (i32.const 32)))
+                      (local.set $jump_dest (call $check_overflow 
+                                             (i64.load (global.get $sp))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 8)))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 16)))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 24)))))
+                      (global.set $sp (i32.sub (global.get $sp) (i32.const 32)))
                       (br $loop)`
         opcodesUsed.add('check_overflow')
         pc = findNextJumpDest(evmCode, pc)
         break
       case 'JUMPI':
         jumpFound = true
-        segment += `(set_local $jump_dest (call $check_overflow 
-                                             (i64.load (get_global $sp))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 8)))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 16)))
-                                             (i64.load (i32.add (get_global $sp) (i32.const 24)))))
+        segment += `(local.set $jump_dest (call $check_overflow 
+                                             (i64.load (global.get $sp))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 8)))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 16)))
+                                             (i64.load (i32.add (global.get $sp) (i32.const 24)))))
 
-                    (set_global $sp (i32.sub (get_global $sp) (i32.const 64)))
+                    (global.set $sp (i32.sub (global.get $sp) (i32.const 64)))
                     (br_if $loop (i32.eqz (i64.eqz (i64.or
-                      (i64.load (i32.add (get_global $sp) (i32.const 32)))
+                      (i64.load (i32.add (global.get $sp) (i32.const 32)))
                       (i64.or
-                        (i64.load (i32.add (get_global $sp) (i32.const 40)))
+                        (i64.load (i32.add (global.get $sp) (i32.const 40)))
                         (i64.or
-                          (i64.load (i32.add (get_global $sp) (i32.const 48)))
-                          (i64.load (i32.add (get_global $sp) (i32.const 56)))
+                          (i64.load (i32.add (global.get $sp) (i32.const 48)))
+                          (i64.load (i32.add (global.get $sp) (i32.const 56)))
                         )
                       )
                     ))))\n`
@@ -339,13 +339,13 @@ exports.evm2wast = function (evmCode, opts = {
     const stackDelta = op.on - op.off
     // update the stack pointer
     if (stackDelta !== 0) {
-      segment += `(set_global $sp (i32.add (get_global $sp) (i32.const ${stackDelta * 32})))\n`
+      segment += `(global.set $sp (i32.add (global.get $sp) (i32.const ${stackDelta * 32})))\n`
     }
 
     // adds the logic to save the stack pointer before exiting to wiat to for a callback
     // note, this must be done before the sp is updated above^
     if (opts.useAsyncAPI && callbackFuncs.has(op.name)) {
-      segment += `(set_global $cb_dest (i32.const ${jumpSegments.length + 1}))
+      segment += `(global.set $cb_dest (i32.const ${jumpSegments.length + 1}))
           (br $done))`
       jumpSegments.push({
         type: 'cb_dest'
@@ -396,7 +396,7 @@ function assembleSegments (segments) {
   (func $main
     (export "main")
     (local $jump_dest i32) (local $jump_map_switch i32)
-    (set_local $jump_dest (i32.const -1))
+    (local.set $jump_dest (i32.const -1))
 
     (block $done
       (loop $loop
@@ -413,7 +413,7 @@ function buildJumpMap (segments) {
   segments.forEach((seg, index) => {
     brTable += ' $' + (index + 1)
     if (seg.type === 'jump_dest') {
-      wasm = `(if (i32.eq (get_local $jump_dest) (i32.const ${seg.number}))
+      wasm = `(if (i32.eq (local.get $jump_dest) (i32.const ${seg.number}))
                 (then (br $${index + 1}))
                 (else ${wasm}))`
     }
@@ -422,21 +422,21 @@ function buildJumpMap (segments) {
   wasm = `
   (block $0 
     (if
-      (i32.eqz (get_global $init))
+      (i32.eqz (global.get $init))
       (then
-        (set_global $init (i32.const 1))
+        (global.set $init (i32.const 1))
         (br $0))
       (else
         ;; the callback dest can never be in the first block
-        (if (i32.eq (get_global $cb_dest) (i32.const 0)) 
+        (if (i32.eq (global.get $cb_dest) (i32.const 0)) 
           (then
             ${wasm}
           )
           (else 
             ;; return callback destination and zero out $cb_dest 
-            (set_local $jump_map_switch (get_global $cb_dest))
-            (set_global $cb_dest (i32.const 0))
-            (br_table $0 ${brTable} (get_local $jump_map_switch))
+            (local.set $jump_map_switch (global.get $cb_dest))
+            (global.set $cb_dest (i32.const 0))
+            (br_table $0 ${brTable} (local.get $jump_map_switch))
           )))))`
 
   return wasm
