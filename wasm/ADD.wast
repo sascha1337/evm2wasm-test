@@ -6,48 +6,48 @@
   (local $d i64)
   (local $carry i64)
 
-  (set_local $sp (get_global $sp))
+  (local.set $sp (global.get $sp))
   
   ;; d c b a
   ;; pop the stack 
-  (set_local $a (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $c (i64.load (i32.add (get_local $sp) (i32.const 8))))
-  (set_local $d (i64.load (get_local $sp)))
+  (local.set $a (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $c (i64.load (i32.add (local.get $sp) (i32.const 8))))
+  (local.set $d (i64.load (local.get $sp)))
   ;; decement the stack pointer
-  (set_local $sp (i32.sub (get_local $sp) (i32.const 8)))
+  (local.set $sp (i32.sub (local.get $sp) (i32.const 8)))
 
   ;; d 
-  (set_local $carry (i64.add (get_local $d) (i64.load (i32.sub (get_local $sp) (i32.const 24)))))
+  (local.set $carry (i64.add (local.get $d) (i64.load (i32.sub (local.get $sp) (i32.const 24)))))
   ;; save d  to mem
-  (i64.store (i32.sub (get_local $sp) (i32.const 24)) (get_local $carry))
+  (i64.store (i32.sub (local.get $sp) (i32.const 24)) (local.get $carry))
   ;; check  for overflow
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $carry) (get_local $d))))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $carry) (local.get $d))))
 
   ;; c use $d as reg
-  (set_local $d     (i64.add (i64.load (i32.sub (get_local $sp) (i32.const 16))) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $d) (get_local $carry))))
-  (set_local $d     (i64.add (get_local $c) (get_local $d)))
+  (local.set $d     (i64.add (i64.load (i32.sub (local.get $sp) (i32.const 16))) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $d) (local.get $carry))))
+  (local.set $d     (i64.add (local.get $c) (local.get $d)))
   ;; store the result
-  (i64.store (i32.sub (get_local $sp) (i32.const 16)) (get_local $d))
+  (i64.store (i32.sub (local.get $sp) (i32.const 16)) (local.get $d))
   ;; check overflow
-  (set_local $carry (i64.or (i64.extend_u/i32  (i64.lt_u (get_local $d) (get_local $c))) (get_local $carry)))
+  (local.set $carry (i64.or (i64.extend_u/i32  (i64.lt_u (local.get $d) (local.get $c))) (local.get $carry)))
 
   ;; b
   ;; add carry
-  (set_local $d     (i64.add (i64.load (i32.sub (get_local $sp) (i32.const 8))) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $d) (get_local $carry))))
+  (local.set $d     (i64.add (i64.load (i32.sub (local.get $sp) (i32.const 8))) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $d) (local.get $carry))))
 
   ;; use reg c
-  (set_local $c (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $d (i64.add (get_local $c) (get_local $d)))
-  (i64.store (i32.sub (get_local $sp) (i32.const 8)) (get_local $d))
+  (local.set $c (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $d (i64.add (local.get $c) (local.get $d)))
+  (i64.store (i32.sub (local.get $sp) (i32.const 8)) (local.get $d))
   ;; a
-  (i64.store (get_local $sp) 
+  (i64.store (local.get $sp) 
              (i64.add        ;; add a 
-               (get_local $a)
+               (local.get $a)
                (i64.add
-                 (i64.load (get_local $sp))  ;; load the operand
+                 (i64.load (local.get $sp))  ;; load the operand
                  (i64.or  ;; carry 
-                   (i64.extend_u/i32 (i64.lt_u (get_local $d) (get_local $c))) 
-                   (get_local $carry)))))
+                   (i64.extend_u/i32 (i64.lt_u (local.get $d) (local.get $c))) 
+                   (local.get $carry)))))
 )

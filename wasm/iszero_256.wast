@@ -5,5 +5,5 @@
   (param i64)
   (result i32)
 
-  (i64.eqz (i64.or (i64.or (i64.or (get_local 0) (get_local 1)) (get_local 2)) (get_local 3))) 
+  (i64.eqz (i64.or (i64.or (i64.or (local.get 0) (local.get 1)) (local.get 2)) (local.get 3))) 
 )

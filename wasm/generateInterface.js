@@ -209,9 +209,9 @@ function toWasmType (type) {
 function getStackItem (spOffset, shiftOffset) {
   shiftOffset = shiftOffset || 0
   if (spOffset === 0 && shiftOffset === 0) {
-    return '(get_global $sp)'
+    return '(global.get $sp)'
   } else {
-    return `(i32.add (get_global $sp) (i32.const ${spOffset * 32 + shiftOffset}))`
+    return `(i32.add (global.get $sp) (i32.const ${spOffset * 32 + shiftOffset}))`
   }
 }
 
@@ -327,10 +327,10 @@ function generateManifest (interfaceManifest, opts) {
         /*
         call += `(call $check_overflow_i64
            (i64.add (i64.const 2300)
-             (i64.load (i32.add (get_global $sp) (i32.const ${spOffset * 32}))))
-           (i64.load (i32.add (get_global $sp) (i32.const ${spOffset * 32 + 8})))
-           (i64.load (i32.add (get_global $sp) (i32.const ${spOffset * 32 + 8 * 2})))
-           (i64.load (i32.add (get_global $sp) (i32.const ${spOffset * 32 + 8 * 3}))))`
+             (i64.load (i32.add (global.get $sp) (i32.const ${spOffset * 32}))))
+           (i64.load (i32.add (global.get $sp) (i32.const ${spOffset * 32 + 8})))
+           (i64.load (i32.add (global.get $sp) (i32.const ${spOffset * 32 + 8 * 2})))
+           (i64.load (i32.add (global.get $sp) (i32.const ${spOffset * 32 + 8 * 3}))))`
         */
 
         // 2300 gas subsidy is done in Hera
@@ -342,21 +342,21 @@ function generateManifest (interfaceManifest, opts) {
       } else if (input === 'writeOffset' || input === 'readOffset') {
         lastOffset = input
         locals += `(local $offset${numOfLocals} i32)`
-        body += `(set_local $offset${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
-        call += `(get_local $offset${numOfLocals})`
+        body += `(local.set $offset${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
+        call += `(local.get $offset${numOfLocals})`
       } else if (input === 'length' && (opcode === 'CALL' || opcode === 'CALLCODE' || opcode === 'DELEGATECALL' || opcode === 'STATICCALL')) {
         // CALLs in EVM have 7 arguments
         // but in ewasm CALLs only have 5 arguments
         // so delete the bottom two stack elements, after processing the 5th argument
 
         locals += `(local $length${numOfLocals} i32)`
-        body += `(set_local $length${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
+        body += `(local.set $length${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
 
         body += `
-    (call $memusegas (get_local $offset${numOfLocals}) (get_local $length${numOfLocals}))
-    (set_local $offset${numOfLocals} (i32.add (get_global $memstart) (get_local $offset${numOfLocals})))`
+    (call $memusegas (local.get $offset${numOfLocals}) (local.get $length${numOfLocals}))
+    (local.set $offset${numOfLocals} (i32.add (global.get $memstart) (local.get $offset${numOfLocals})))`
 
-        call += `(get_local $length${numOfLocals})`
+        call += `(local.get $length${numOfLocals})`
         numOfLocals++
 
         // delete 6th stack element
@@ -366,13 +366,13 @@ function generateManifest (interfaceManifest, opts) {
         spOffset--
       } else if (input === 'length' && (opcode !== 'CALL' && opcode !== 'CALLCODE' && opcode !== 'DELEGATECALL' && opcode !== 'STATICCALL')) {
         locals += `(local $length${numOfLocals} i32)`
-        body += `(set_local $length${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
+        body += `(local.set $length${numOfLocals} ${checkOverflowStackItem256(spOffset)})`
 
         body += `
-    (call $memusegas (get_local $offset${numOfLocals}) (get_local $length${numOfLocals}))
-    (set_local $offset${numOfLocals} (i32.add (get_global $memstart) (get_local $offset${numOfLocals})))`
+    (call $memusegas (local.get $offset${numOfLocals}) (local.get $length${numOfLocals}))
+    (local.set $offset${numOfLocals} (i32.add (global.get $memstart) (local.get $offset${numOfLocals})))`
 
-        call += `(get_local $length${numOfLocals})`
+        call += `(local.get $length${numOfLocals})`
         numOfLocals++
       }
       spOffset--
@@ -386,7 +386,7 @@ function generateManifest (interfaceManifest, opts) {
       call += getStackItem(spOffset)
 
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
 
       call += ')'
@@ -395,7 +395,7 @@ function generateManifest (interfaceManifest, opts) {
       call += getStackItem(spOffset)
 
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
 
       call += ')'
@@ -406,7 +406,7 @@ function generateManifest (interfaceManifest, opts) {
       call += getStackItem(spOffset)
 
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
 
       call += ')'
@@ -414,7 +414,7 @@ function generateManifest (interfaceManifest, opts) {
       call += `(drop (call $bswap_m256 ${getStackItem(spOffset)}))`
     } else if (output === 'i32') {
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
 
       if (opcode === 'CALL' || opcode === 'CALLCODE' || opcode === 'DELEGATECALL' || opcode === 'STATICCALL') {
@@ -428,7 +428,7 @@ function generateManifest (interfaceManifest, opts) {
       call += cleanupStackItem64(spOffset)
     } else if (output === 'i64') {
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
       call = `(i64.store ${getStackItem(spOffset)} ${call})`
 
@@ -436,7 +436,7 @@ function generateManifest (interfaceManifest, opts) {
       call += cleanupStackItem64(spOffset)
     } else if (!output) {
       if (useAsyncAPI && op.async) {
-        call += '(get_local $callback)'
+        call += '(local.get $callback)'
       }
       call += ')'
     }

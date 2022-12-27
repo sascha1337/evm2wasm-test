@@ -3,8 +3,8 @@
   (result i32)
   (local $temp i64)
 
-  (set_local $temp (call $bswap_i64 (i64.load (get_local $sp))))
-  (i64.store (get_local $sp) (call $bswap_i64 (i64.load (i32.add (get_local $sp) (i32.const 8)))))
-  (i64.store (i32.add (get_local $sp) (i32.const 8)) (get_local $temp))
-  (get_local $sp)
+  (local.set $temp (call $bswap_i64 (i64.load (local.get $sp))))
+  (i64.store (local.get $sp) (call $bswap_i64 (i64.load (i32.add (local.get $sp) (i32.const 8)))))
+  (i64.store (i32.add (local.get $sp) (i32.const 8)) (local.get $temp))
+  (local.get $sp)
 )

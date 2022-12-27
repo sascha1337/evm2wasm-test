@@ -14,37 +14,37 @@
   (local $contextOffset i32)
   (local $outputOffset i32)
 
-  (set_local $length0 (i64.load (i32.sub (get_global $sp) (i32.const 32))))
-  (set_local $length1 (i64.load (i32.sub (get_global $sp) (i32.const 24))))
-  (set_local $length2 (i64.load (i32.sub (get_global $sp) (i32.const 16))))
-  (set_local $length3 (i64.load (i32.sub (get_global $sp) (i32.const 8))))
+  (local.set $length0 (i64.load (i32.sub (global.get $sp) (i32.const 32))))
+  (local.set $length1 (i64.load (i32.sub (global.get $sp) (i32.const 24))))
+  (local.set $length2 (i64.load (i32.sub (global.get $sp) (i32.const 16))))
+  (local.set $length3 (i64.load (i32.sub (global.get $sp) (i32.const 8))))
 
-  (set_local $dataOffset0 (i64.load (i32.add (get_global $sp) (i32.const 0))))
-  (set_local $dataOffset1 (i64.load (i32.add (get_global $sp) (i32.const 8))))
-  (set_local $dataOffset2 (i64.load (i32.add (get_global $sp) (i32.const 16))))
-  (set_local $dataOffset3 (i64.load (i32.add (get_global $sp) (i32.const 24))))
+  (local.set $dataOffset0 (i64.load (i32.add (global.get $sp) (i32.const 0))))
+  (local.set $dataOffset1 (i64.load (i32.add (global.get $sp) (i32.const 8))))
+  (local.set $dataOffset2 (i64.load (i32.add (global.get $sp) (i32.const 16))))
+  (local.set $dataOffset3 (i64.load (i32.add (global.get $sp) (i32.const 24))))
 
-  (set_local $length 
-             (call $check_overflow (get_local $length0)
-                                   (get_local $length1)
-                                   (get_local $length2)
-                                   (get_local $length3)))
-  (set_local $dataOffset 
-             (call $check_overflow (get_local $dataOffset0)
-                                   (get_local $dataOffset1)
-                                   (get_local $dataOffset2)
-                                   (get_local $dataOffset3)))
+  (local.set $length 
+             (call $check_overflow (local.get $length0)
+                                   (local.get $length1)
+                                   (local.get $length2)
+                                   (local.get $length3)))
+  (local.set $dataOffset 
+             (call $check_overflow (local.get $dataOffset0)
+                                   (local.get $dataOffset1)
+                                   (local.get $dataOffset2)
+                                   (local.get $dataOffset3)))
 
   ;; charge copy fee ceil(words/32) * 6 
-  (call $useGas (i64.extend_u/i32 (i32.mul (i32.div_u (i32.add (get_local $length) (i32.const 31)) (i32.const 32)) (i32.const 6))))
-  (call $memusegas (get_local $dataOffset) (get_local $length))
+  (call $useGas (i64.extend_u/i32 (i32.mul (i32.div_u (i32.add (local.get $length) (i32.const 31)) (i32.const 32)) (i32.const 6))))
+  (call $memusegas (local.get $dataOffset) (local.get $length))
 
-  (set_local $dataOffset (i32.add (get_global $memstart) (get_local $dataOffset)))
+  (local.set $dataOffset (i32.add (global.get $memstart) (local.get $dataOffset)))
 
-  (set_local $contextOffset (i32.const 32808))
-  (set_local $outputOffset (i32.sub (get_global $sp) (i32.const 32)))
+  (local.set $contextOffset (i32.const 32808))
+  (local.set $outputOffset (i32.sub (global.get $sp) (i32.const 32)))
 
-  (call $keccak (get_local $contextOffset) (get_local $dataOffset) (get_local $length) (get_local $outputOffset))
+  (call $keccak (local.get $contextOffset) (local.get $dataOffset) (local.get $length) (local.get $outputOffset))
 
-  (drop (call $bswap_m256 (get_local $outputOffset)))
+  (drop (call $bswap_m256 (local.get $outputOffset)))
 )

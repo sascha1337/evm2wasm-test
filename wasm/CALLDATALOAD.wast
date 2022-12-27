@@ -7,23 +7,23 @@
   (local $writeOffset2 i64)
   (local $writeOffset3 i64)
 
-  (set_local $writeOffset0 (i64.load (i32.add (get_global $sp) (i32.const  0))))
-  (set_local $writeOffset1 (i64.load (i32.add (get_global $sp) (i32.const  8))))
-  (set_local $writeOffset2 (i64.load (i32.add (get_global $sp) (i32.const 16))))
-  (set_local $writeOffset3 (i64.load (i32.add (get_global $sp) (i32.const 24))))
+  (local.set $writeOffset0 (i64.load (i32.add (global.get $sp) (i32.const  0))))
+  (local.set $writeOffset1 (i64.load (i32.add (global.get $sp) (i32.const  8))))
+  (local.set $writeOffset2 (i64.load (i32.add (global.get $sp) (i32.const 16))))
+  (local.set $writeOffset3 (i64.load (i32.add (global.get $sp) (i32.const 24))))
 
-  (i64.store (i32.add (get_global $sp) (i32.const  0)) (i64.const 0))
-  (i64.store (i32.add (get_global $sp) (i32.const  8)) (i64.const 0))
-  (i64.store (i32.add (get_global $sp) (i32.const 16)) (i64.const 0))
-  (i64.store (i32.add (get_global $sp) (i32.const 24)) (i64.const 0))
+  (i64.store (i32.add (global.get $sp) (i32.const  0)) (i64.const 0))
+  (i64.store (i32.add (global.get $sp) (i32.const  8)) (i64.const 0))
+  (i64.store (i32.add (global.get $sp) (i32.const 16)) (i64.const 0))
+  (i64.store (i32.add (global.get $sp) (i32.const 24)) (i64.const 0))
 
-  (set_local $writeOffset
-             (call $check_overflow (get_local $writeOffset0)
-                                   (get_local $writeOffset1)
-                                   (get_local $writeOffset2)
-                                   (get_local $writeOffset3)))
+  (local.set $writeOffset
+             (call $check_overflow (local.get $writeOffset0)
+                                   (local.get $writeOffset1)
+                                   (local.get $writeOffset2)
+                                   (local.get $writeOffset3)))
 
-  (call $callDataCopy (get_global $sp) (get_local $writeOffset) (i32.const 32))
+  (call $callDataCopy (global.get $sp) (local.get $writeOffset) (i32.const 32))
   ;; swap top stack item
-  (drop (call $bswap_m256 (get_global $sp)))
+  (drop (call $bswap_m256 (global.get $sp)))
 )

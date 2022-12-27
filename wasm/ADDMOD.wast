@@ -22,49 +22,49 @@
 
   (local $carry i64)
 
-  (set_local $sp (get_global $sp))
+  (local.set $sp (global.get $sp))
 
   ;; load args from the stack
-  (set_local $a (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $b (i64.load (i32.add (get_local $sp) (i32.const 16))))
-  (set_local $c (i64.load (i32.add (get_local $sp) (i32.const 8))))
-  (set_local $d (i64.load (get_local $sp)))
+  (local.set $a (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $b (i64.load (i32.add (local.get $sp) (i32.const 16))))
+  (local.set $c (i64.load (i32.add (local.get $sp) (i32.const 8))))
+  (local.set $d (i64.load (local.get $sp)))
 
-  (set_local $sp (i32.sub (get_local $sp) (i32.const 32)))
+  (local.set $sp (i32.sub (local.get $sp) (i32.const 32)))
 
-  (set_local $a1 (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $b1 (i64.load (i32.add (get_local $sp) (i32.const 16))))
-  (set_local $c1 (i64.load (i32.add (get_local $sp) (i32.const 8))))
-  (set_local $d1 (i64.load (get_local $sp)))
+  (local.set $a1 (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $b1 (i64.load (i32.add (local.get $sp) (i32.const 16))))
+  (local.set $c1 (i64.load (i32.add (local.get $sp) (i32.const 8))))
+  (local.set $d1 (i64.load (local.get $sp)))
 
-  (set_local $sp (i32.sub (get_local $sp) (i32.const 32)))
+  (local.set $sp (i32.sub (local.get $sp) (i32.const 32)))
 
-  (set_local $moda (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $modb (i64.load (i32.add (get_local $sp) (i32.const 16))))
-  (set_local $modc (i64.load (i32.add (get_local $sp) (i32.const 8))))
-  (set_local $modd (i64.load (get_local $sp)))
+  (local.set $moda (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $modb (i64.load (i32.add (local.get $sp) (i32.const 16))))
+  (local.set $modc (i64.load (i32.add (local.get $sp) (i32.const 8))))
+  (local.set $modd (i64.load (local.get $sp)))
 
   ;; a * 64^3 + b*64^2 + c*64 + d 
   ;; d 
-  (set_local $d     (i64.add (get_local $d1) (get_local $d)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $d) (get_local $d1))))
+  (local.set $d     (i64.add (local.get $d1) (local.get $d)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $d) (local.get $d1))))
   ;; c
-  (set_local $c     (i64.add (get_local $c) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $c) (get_local $carry))))
-  (set_local $c     (i64.add (get_local $c1) (get_local $c)))
-  (set_local $carry (i64.or (i64.extend_u/i32  (i64.lt_u (get_local $c) (get_local $c1))) (get_local $carry)))
+  (local.set $c     (i64.add (local.get $c) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $c) (local.get $carry))))
+  (local.set $c     (i64.add (local.get $c1) (local.get $c)))
+  (local.set $carry (i64.or (i64.extend_u/i32  (i64.lt_u (local.get $c) (local.get $c1))) (local.get $carry)))
   ;; b
-  (set_local $b     (i64.add (get_local $b) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $b) (get_local $carry))))
-  (set_local $b     (i64.add (get_local $b1) (get_local $b)))
-  (set_local $carry (i64.or (i64.extend_u/i32  (i64.lt_u (get_local $b) (get_local $b1))) (get_local $carry)))
+  (local.set $b     (i64.add (local.get $b) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $b) (local.get $carry))))
+  (local.set $b     (i64.add (local.get $b1) (local.get $b)))
+  (local.set $carry (i64.or (i64.extend_u/i32  (i64.lt_u (local.get $b) (local.get $b1))) (local.get $carry)))
   ;; a
-  (set_local $a     (i64.add (get_local $a) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $a) (get_local $carry))))
-  (set_local $a     (i64.add (get_local $a1) (get_local $a)))
-  (set_local $carry (i64.or (i64.extend_u/i32  (i64.lt_u (get_local $a) (get_local $a1))) (get_local $carry)))
+  (local.set $a     (i64.add (local.get $a) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $a) (local.get $carry))))
+  (local.set $a     (i64.add (local.get $a1) (local.get $a)))
+  (local.set $carry (i64.or (i64.extend_u/i32  (i64.lt_u (local.get $a) (local.get $a1))) (local.get $carry)))
 
   (call $mod_320
-        (get_local $carry) (get_local $a)    (get_local $b)    (get_local $c)    (get_local $d)
-        (i64.const 0)      (get_local $moda) (get_local $modb) (get_local $modc) (get_local $modd) (get_local $sp))
+        (local.get $carry) (local.get $a)    (local.get $b)    (local.get $c)    (local.get $d)
+        (i64.const 0)      (local.get $moda) (local.get $modb) (local.get $modc) (local.get $modd) (local.get $sp))
 )

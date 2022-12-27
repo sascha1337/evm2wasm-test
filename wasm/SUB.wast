@@ -14,39 +14,39 @@
   (local $carry i64)
   (local $temp i64)
 
-  (set_local $a (i64.load (i32.add (get_global $sp) (i32.const 24))))
-  (set_local $b (i64.load (i32.add (get_global $sp) (i32.const 16))))
-  (set_local $c (i64.load (i32.add (get_global $sp) (i32.const  8))))
-  (set_local $d (i64.load          (get_global $sp)))
+  (local.set $a (i64.load (i32.add (global.get $sp) (i32.const 24))))
+  (local.set $b (i64.load (i32.add (global.get $sp) (i32.const 16))))
+  (local.set $c (i64.load (i32.add (global.get $sp) (i32.const  8))))
+  (local.set $d (i64.load          (global.get $sp)))
   ;; decement the stack pointer
-  (set_local $sp (i32.sub (get_global $sp) (i32.const 32)))
+  (local.set $sp (i32.sub (global.get $sp) (i32.const 32)))
 
-  (set_local $a1 (i64.load (i32.add (get_local $sp) (i32.const 24))))
-  (set_local $b1 (i64.load (i32.add (get_local $sp) (i32.const 16))))
-  (set_local $c1 (i64.load (i32.add (get_local $sp) (i32.const  8))))
-  (set_local $d1 (i64.load          (get_local $sp)))
+  (local.set $a1 (i64.load (i32.add (local.get $sp) (i32.const 24))))
+  (local.set $b1 (i64.load (i32.add (local.get $sp) (i32.const 16))))
+  (local.set $c1 (i64.load (i32.add (local.get $sp) (i32.const  8))))
+  (local.set $d1 (i64.load          (local.get $sp)))
 
   ;; a * 64^3 + b*64^2 + c*64 + d 
   ;; d
-  (set_local $carry (i64.extend_u/i32 (i64.lt_u (get_local $d) (get_local $d1))))
-  (set_local $d (i64.sub (get_local $d) (get_local $d1)))
+  (local.set $carry (i64.extend_u/i32 (i64.lt_u (local.get $d) (local.get $d1))))
+  (local.set $d (i64.sub (local.get $d) (local.get $d1)))
 
   ;; c
-  (set_local $temp (i64.sub (get_local $c) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.gt_u (get_local $temp) (get_local $c))))
-  (set_local $c (i64.sub (get_local $temp) (get_local $c1)))
-  (set_local $carry (i64.or (i64.extend_u/i32 (i64.gt_u (get_local $c) (get_local $temp))) (get_local $carry)))
+  (local.set $temp (i64.sub (local.get $c) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.gt_u (local.get $temp) (local.get $c))))
+  (local.set $c (i64.sub (local.get $temp) (local.get $c1)))
+  (local.set $carry (i64.or (i64.extend_u/i32 (i64.gt_u (local.get $c) (local.get $temp))) (local.get $carry)))
 
   ;; b
-  (set_local $temp (i64.sub (get_local $b) (get_local $carry)))
-  (set_local $carry (i64.extend_u/i32 (i64.gt_u (get_local $temp) (get_local $b))))
-  (set_local $b (i64.sub (get_local $temp) (get_local $b1)))
+  (local.set $temp (i64.sub (local.get $b) (local.get $carry)))
+  (local.set $carry (i64.extend_u/i32 (i64.gt_u (local.get $temp) (local.get $b))))
+  (local.set $b (i64.sub (local.get $temp) (local.get $b1)))
 
   ;; a
-  (set_local $a (i64.sub (i64.sub (get_local $a) (i64.or (i64.extend_u/i32 (i64.gt_u (get_local $b) (get_local $temp))) (get_local $carry))) (get_local $a1)))
+  (local.set $a (i64.sub (i64.sub (local.get $a) (i64.or (i64.extend_u/i32 (i64.gt_u (local.get $b) (local.get $temp))) (local.get $carry))) (local.get $a1)))
 
-  (i64.store (i32.add (get_local $sp) (i32.const 24)) (get_local $a))
-  (i64.store (i32.add (get_local $sp) (i32.const 16)) (get_local $b))
-  (i64.store (i32.add (get_local $sp) (i32.const  8)) (get_local $c))
-  (i64.store          (get_local $sp)                 (get_local $d))
+  (i64.store (i32.add (local.get $sp) (i32.const 24)) (local.get $a))
+  (i64.store (i32.add (local.get $sp) (i32.const 16)) (local.get $b))
+  (i64.store (i32.add (local.get $sp) (i32.const  8)) (local.get $c))
+  (i64.store          (local.get $sp)                 (local.get $d))
 )

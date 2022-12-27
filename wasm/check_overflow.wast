@@ -6,17 +6,17 @@
   (result i32)
 
   (local $MAX_INT i32)
-  (set_local $MAX_INT (i32.const -1))
+  (local.set $MAX_INT (i32.const -1))
 
   (if
     (i32.and 
       (i32.and 
-        (i64.eqz  (get_local $d))
-        (i64.eqz  (get_local $c)))
+        (i64.eqz  (local.get $d))
+        (i64.eqz  (local.get $c)))
       (i32.and 
-        (i64.eqz  (get_local $b))
-        (i64.lt_u (get_local $a) (i64.extend_u/i32 (get_local $MAX_INT)))))
-     (return (i32.wrap/i64 (get_local $a))))
+        (i64.eqz  (local.get $b))
+        (i64.lt_u (local.get $a) (i64.extend_u/i32 (local.get $MAX_INT)))))
+     (return (i32.wrap/i64 (local.get $a))))
 
-     (return (get_local $MAX_INT))
+     (return (local.get $MAX_INT))
 )

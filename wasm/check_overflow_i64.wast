@@ -8,10 +8,10 @@
   (if
     (i32.and 
       (i32.and 
-        (i64.eqz  (get_local $d))
-        (i64.eqz  (get_local $c)))
-      (i64.eqz  (get_local $b)))
-    (return (get_local $a)))
+        (i64.eqz  (local.get $d))
+        (i64.eqz  (local.get $c)))
+      (i64.eqz  (local.get $b)))
+    (return (local.get $a)))
 
     (return (i64.const 0xffffffffffffffff))
 )

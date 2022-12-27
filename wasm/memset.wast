@@ -8,19 +8,19 @@
   (result i32)
   (local $i i32)
 
-  (set_local $i (i32.const 0))
+  (local.set $i (i32.const 0))
 
   (block $done
     (loop $loop
-      (if (i32.ge_u (get_local $i) (get_local $length))
+      (if (i32.ge_u (local.get $i) (local.get $length))
         (br $done)
       )
 
-      (i32.store8 (i32.add (get_local $ptr) (get_local $i)) (get_local $value))
+      (i32.store8 (i32.add (local.get $ptr) (local.get $i)) (local.get $value))
 
-      (set_local $i (i32.add (get_local $i) (i32.const 1)))
+      (local.set $i (i32.add (local.get $i) (i32.const 1)))
       (br $loop)
     )
   )
-  (get_local $ptr)
+  (local.get $ptr)
 )
