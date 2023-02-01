@@ -1,5 +1,4 @@
-defaults:
-
+jobs:
   npm-install: &npm-install
     run:
       name: "Install npm deps"
@@ -145,7 +144,7 @@ defaults:
     # - *store-hera
     - *state-tests-cpp
 
-version: 2
+version: 2.1
 jobs:
   # to run this using local circleci tool, rename Ewasm-Tests to `build` then do `circleci build -c circle.yml`
   build-js:
@@ -161,7 +160,7 @@ jobs:
     steps: *cpp-state-test-steps
 
 workflows:
-  version: 2
+  version: 2.1
   evm2wasm-build:
     jobs:
        - build-js
